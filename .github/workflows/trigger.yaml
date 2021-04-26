@@ -1,0 +1,26 @@
+name: Trigger Update
+
+on:
+  schedule:
+    - cron: '0 5 * * *'
+
+jobs:
+  qv_trigger:
+    runs-on: ubuntu-latest
+
+    container: 'registry.opensuse.org/opensuse/tumbleweed'
+
+    steps:
+      - run: zypper -n install
+              osc
+              obs-service-obs_scm
+              obs-service-tar
+              obs-service-recompress
+              obs-service-set_version
+
+      - run: |
+          mkdir -p ~/.config/osc
+          echo -e "[general]\napiurl = https://api.opensuse.org\n[https://api.opensuse.org]\nuser=${{ secrets.OBS_USER }}\npass=${{ secrets.OBS_PASS }}\n${{ secrets.CREDENTIALS_XX }}" \
+          > ~/.config/osc/oscrc
+
+      - run: osc api /build/home:zzndb:Qv2ray/openSUSE_Tumbleweed/x86_64/Qv2ray
