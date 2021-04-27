@@ -53,7 +53,7 @@ update_version() {
         exit 5
     fi
     # change revision as well
-    update_rev
+    update_rev 'Qv2ray'
     set +x
 }
 
