@@ -49,12 +49,16 @@ update_version() {
         osc revert "${_service}"
         exit 5
     fi
-    # change revision as well 
+    # change revision as well
+    update_rev
+    set +x
+}
+
+update_rev() {
     local old_rev
     old_rev="$(__query_service_param 'revision')"
     if ! sed -i "s/${old_rev}/${__gitrev}/g" "${_service}" ; then
         osc revert "${_service}"
         exit 5
     fi
-    set +x
 }

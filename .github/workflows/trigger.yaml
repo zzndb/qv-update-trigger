@@ -21,6 +21,7 @@ jobs:
               obs-service-recompress
               obs-service-set_version
               git
+              gawk
               cpio # FIXME this line after upstream add cpio to obs_scm requires
 
       - name: Prepare env
@@ -46,3 +47,4 @@ jobs:
           export REPO_DIR=${{ env.REPO_DIR }}
           export  OBS_DIR=${{ env.OBS_DIR  }}
           ${REPO_DIR}/scripts/qv2ray_preview_update.sh
+          ${REPO_DIR}/scripts/qvplugin_update.sh
