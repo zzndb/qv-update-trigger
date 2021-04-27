@@ -5,6 +5,7 @@ set -euo pipefail
 ## needed outer parameters
 ## OBS_DIR, REPO_DIR
 OBS_PRJ='home:zzndb001:test'
+UP_USER='zzndb'
 
 # needed: plugins project placed in the directory below
 PLUGIN_DIR="${OBS_DIR}/${OBS_PRJ}"
@@ -31,6 +32,14 @@ for p in "${dir_list[@]}"; do
     set -x
     # update
     osc up
+
+    # clone source
+    ## seems osc do not check upstream if source exist?
+    [[ ! -d "${p%-preview}" ]] && {
+        if ! git clone -b dev https://github.com/"${UP_USER}${p%-preview}".git; then
+            exit
+        fi
+    }
 
     GIT_DIR="$(find . -maxdepth 2 -type d -name '.git' | grep 'QvPlugin-')"
     CURRENT="$(__query_service_param 'revision')"

@@ -46,6 +46,7 @@ __old_version="$(__query_old_base_version "versionformat")"
 CURRENT="$(__query_service_param 'revision')"
 
 # seems just need record last commit short rev
+## seems osc do not check upstream if source exist?
 [[ ! -d Qv2ray ]] && {
     if ! git clone -b dev https://github.com/${UP_REPO}.git; then
         exit 
