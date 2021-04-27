@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Install needed packages
-      - run: zypper -n install
+        run: zypper -n install
               osc
               obs-service-obs_scm
               obs-service-tar
@@ -23,20 +23,23 @@ jobs:
               git
 
       - name: Prepare env
-      - run: |
+        run: |
           mkdir -p ~/.config/osc
           echo "${{ secrets.OSCRC_HEADER }}"  >  ~/.config/osc/oscrc
           echo "user=${{ secrets.OBS_USER }}" >> ~/.config/osc/oscrc
           echo "pass=${{ secrets.OBS_PASS }}" >> ~/.config/osc/oscrc
+
           git config --local user.name 'Github Action'
           git config --local user.email 'action@github.com'
           git config --local user.password "${{ secrets.GITHUB_TOKEN }}"
+
           git clone -b master ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}
           echo "REPO_DIR=$(readlink -f ${GITHUB_REPOSITORY#*/})" >> $GITHUB_ENV
+
           mkdir obs && echo "OBS_DIR=$(readlink -f obs)" >> $GITHUB_ENV
 
       - name: Check & Update
-      - run: |
+        run: |
           export REPO_DIR=${{ env.REPO_DIR }}
           export  OBS_DIR=${{ env.OBS_DIR  }}
           ${REPO_DIR}/scripts/qv2ray_previw_update.sh
