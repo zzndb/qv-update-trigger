@@ -2,25 +2,30 @@
 #
 set -euo pipefail
 
-# get log!
-# __log_tdir=.
-__log_mail_path="/home/zzndb/scripts/mail_notify.sh"
-__log_keep_latest=
-source /home/zzndb/scripts/get_log.sh
-
 # - update base
 # - check update
 # - up file or just trigger service run
 
-P_DIR='/home/zzndb/obs/home:zzndb/Qv2ray-preview'
-API_URL='https://api.github.com/repos/Qv2ray/Qv2ray/releases/latest'
+## needed outer parameters
+## OBS_DIR, REP_DIR
+OBS_PRJ='home:zzndb:test/Qv2ray-preview'
+UP_REPO='zzndb/Qv2ray'
+PRJ_DIR="${OBS_DIR}/${OBS_PRJ}"
+API_URL="https://api.github.com/repos/${UP_REPO}/releases/latest"
+
 up_message='trigger update'
 
 VERSION='makespec/VERSION'
 BUILDVERSION='makespec/BUILDVERSION'
 
+## 0xFF
+## checkout obs prj source
+pushd "${OBS_DIR}" || exit
+osc checkout ${OBS_PRJ}
+popd || exit
+
 ## 0x00
-pushd "${P_DIR}" || exit
+pushd "${PRJ_DIR}" || exit
 if ! osc up; then
     exit
 fi
@@ -34,15 +39,20 @@ fi
 ## 0x01-1 
 ## get all version from source
 set -x
-# need maintain source directory
+
+source "${REPO_DIR}"/scripts/obs-utils.sh
+__old_version="$(__query_old_base_version "versionformat")"
+# query old revision from _service
+CURRENT="$(__query_service_param 'revision')"
+
+# seems just need record last commit short rev
 [[ ! -d Qv2ray ]] && {
-    if ! git clone -b dev https://github.com/Qv2ray/Qv2ray.git; then
+    if ! git clone -b dev https://github.com/${UP_REPO}.git; then
         exit 
     fi
 }
 pushd Qv2ray || exit
 # check change
-CURRENT="$(git rev-parse --short HEAD)"
 git fetch --all
 git reset --hard origin/dev
 git pull
@@ -55,17 +65,12 @@ git submodule update --recursive --force
     | grep -cv '^.github\|^.copr\|^debian\|^snap') -le 0 ]] && exit 0
 popd || exit
 
-##
-source /home/zzndb/scripts/obs-utils.sh 
-__old_version="$(__query_old_base_version "versionformat")"
-
-# query old revision
-up_message="${up_message} $(__query_service_param 'revision') -> ${LATEST}"
+up_message="${up_message} ${CURRENT} -> ${LATEST}"
 ### 'version' and 'revision' (for remote specified source pull) in _service file
-source /home/zzndb/scripts/update_service_version.sh
+source "${REPO_DIR}"/scripts/update_service_version.sh
 update_version
 ### get new version from above source
-source /home/zzndb/scripts/update_interface_version.sh
+source "${REPO_DIR}"/scripts/update_interface_version.sh
 update_interface 'spec'
 
 set -x
@@ -77,23 +82,10 @@ __try_renew_obsfile "Qv2ray"
 #         __old_version from __query_old_base_version
 if (("$(__check_version_update "${__old_version}" "${__version}")")); then
     up_message="${up_message}"" & bump base version to ${__version}"
-
-    # get_log!
-    package_name="$(pwd)"
-    package_name="${package_name##*/}"
-    declare -F __log_add_to_message > /dev/null \
-        && __log_add_to_message "bump ${package_name} base version to ${old}"
-
 fi
 # interface version update
 if [[ "$(osc diff 'Qv2ray-preview.spec' | wc --chars)" != "0" ]]; then
     up_message="${up_message}"" & bump interface version to ${latest}"
-
-    # get_log!
-    package_name="$(pwd)"
-    package_name="${package_name##*/}"
-    declare -F __log_add_to_message > /dev/null \
-        && __log_add_to_message "bump ${package_name} interface version to ${latest}"
 fi
 
 osc ar
