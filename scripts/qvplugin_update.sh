@@ -36,7 +36,9 @@ for p in "${dir_list[@]}"; do
     # clone source
     ## seems osc do not check upstream if source exist?
     [[ ! -d "${p%-preview}" ]] && {
-        if ! git clone -b dev https://github.com/"${UP_USER}${p%-preview}".git; then
+        unset branch
+        [[ "${p%-preview}" == "${p}" ]] && branch='master'
+        if ! git clone -b ${branch:-dev} https://github.com/"${UP_USER}/${p%-preview}".git; then
             exit
         fi
     }
