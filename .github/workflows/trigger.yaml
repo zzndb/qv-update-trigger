@@ -25,9 +25,9 @@ jobs:
       - name: Prepare env
         run: |
           mkdir -p ~/.config/osc
-          echo -e "${{ secrets.OSCRC_HEADER }}"  >  ~/.config/osc/oscrc
-          echo -e "user=${{ secrets.OBS_USER }}" >> ~/.config/osc/oscrc
-          echo -e "pass=${{ secrets.OBS_PASS }}" >> ~/.config/osc/oscrc
+          echo -e "${{ secrets.OSCRC_HEADER }}" >  ~/.config/osc/oscrc
+          echo -e "${{ secrets.OBS_USER }}"     >> ~/.config/osc/oscrc
+          echo -e "${{ secrets.OBS_PASS }}"     >> ~/.config/osc/oscrc
 
           git config --global user.name 'Github Action'
           git config --global user.email 'action@github.com'
