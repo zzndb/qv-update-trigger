@@ -39,8 +39,10 @@ __query_github_latest_tag() {
 
 # i: $1 xml tag keyword, like 'version'
 # o: version string
+# PRJ_DIR needed
 __query_service_param() {
     local real_path
+    [[ -v "${PRJ_DIR}" ]] && __error_exit "Project directory 'PRJ_DIR' needed!" 2
     real_path="$(readlink -f "$PRJ_DIR")"
     pushd "${real_path}" >/dev/null || exit 2
     _service="${real_path}/_service"

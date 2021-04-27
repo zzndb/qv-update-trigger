@@ -43,6 +43,7 @@ for p in "${dir_list[@]}"; do
         fi
     }
 
+    PRJ_DIR="${PLUGIN_DIR}/${p}"
     GIT_DIR="$(find . -maxdepth 2 -type d -name '.git' | grep 'QvPlugin-')"
     CURRENT="$(__query_service_param 'revision')"
     # try 'osc service disablerun' once before re-clone source
