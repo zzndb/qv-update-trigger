@@ -3,8 +3,8 @@
 
 # process Qv2ray_preview _service file 'parent-tag' and 'versionprefix' part
 # with the latest version which get query from github
-# P_DIR="$1"
-# P_DIR="$HOME/obs/home:zzndb/Qv2ray-preview/"
+# PRJ_DIR="$1"
+# PRJ_DIR="$HOME/obs/home:zzndb/Qv2ray-preview/"
 # API_URL='https://api.github.com/repos/Qv2ray/Qv2ray/releases/latest'
 
 # VERSION='makespec/VERSION'
@@ -36,7 +36,7 @@ value_check() {
 update_version() {
     set -x
     local real_path
-    real_path="$(readlink -f "$P_DIR")"
+    real_path="$(readlink -f "$PRJ_DIR")"
     _service="${real_path}/_service"
     pushd "${real_path}/Qv2ray" >/dev/null || exit 2
     get_base_version

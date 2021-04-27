@@ -7,7 +7,7 @@ set -euo pipefail
 # - up file or just trigger service run
 
 ## needed outer parameters
-## OBS_DIR, REP_DIR
+## OBS_DIR, REPO_DIR
 OBS_PRJ='home:zzndb001:test/Qv2ray-preview'
 UP_REPO='zzndb/Qv2ray'
 PRJ_DIR="${OBS_DIR}/${OBS_PRJ}"

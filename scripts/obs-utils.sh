@@ -41,7 +41,7 @@ __query_github_latest_tag() {
 # o: version string
 __query_service_param() {
     local real_path
-    real_path="$(readlink -f "$P_DIR")"
+    real_path="$(readlink -f "$PRJ_DIR")"
     pushd "${real_path}" >/dev/null || exit 2
     _service="${real_path}/_service"
     [[ ! -f "${_service}" ]] && exit 3
@@ -55,12 +55,12 @@ __query_service_param() {
 }
 
 # i: $1 xml tag key, $2 new value
-# P_DIR needed
+# PRJ_DIR needed
 __set_service_param() {
     local real_path
     [[ "${1}" == "" ]] && __error_exit "param  needed!" 3
-    [[ -v "${P_DIR}" ]] && __error_exit "Project directory 'P_DIR' needed!" 2
-    real_path="$(readlink -f "$P_DIR")"
+    [[ -v "${PRJ_DIR}" ]] && __error_exit "Project directory 'PRJ_DIR' needed!" 2
+    real_path="$(readlink -f "$PRJ_DIR")"
     pushd "${real_path}" >/dev/null || exit 2
     _service="${real_path}/_service"
     [[ ! -f "${_service}" ]] && exit 3
@@ -74,14 +74,14 @@ __set_service_param() {
 }
 
 # get '_service' path, 'old' version
-# P_DIR needed
+# PRJ_DIR needed
 # i: [optional] keyword
 # like: <param name="version">2.7.0.6000~git.94d701ce</param>
 # o: 2.7.0
 __query_old_base_version() {
-    [[ -v "${P_DIR}" ]] && __error_exit "Project directory 'P_DIR' needed!" 2
+    [[ -v "${PRJ_DIR}" ]] && __error_exit "Project directory 'PRJ_DIR' needed!" 2
     local real_path
-    real_path="$(readlink -f "$P_DIR")"
+    real_path="$(readlink -f "$PRJ_DIR")"
     pushd "${real_path}" >/dev/null || exit 2
     _service="${real_path}/_service"
     [[ ! -f "${_service}" ]] && exit 3
