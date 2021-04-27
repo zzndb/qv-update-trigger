@@ -36,7 +36,7 @@ fi
 # ~/scripts/update_parent_version.sh
 # [[ "$?" != 0 ]] && exit
 #
-## 0x01-1 
+## 0x01-1
 ## get all version from source
 set -x
 
@@ -49,7 +49,7 @@ CURRENT="$(__query_service_param 'revision')"
 ## seems osc do not check upstream if source exist?
 [[ ! -d Qv2ray ]] && {
     if ! git clone -b dev https://github.com/${UP_REPO}.git; then
-        exit 
+        exit
     fi
 }
 pushd Qv2ray || exit
@@ -62,8 +62,8 @@ git submodule update --init --recursive
 git submodule update --recursive --force
 [[ "${CURRENT}" == "${LATEST}" && "${CURRENT}" != "" ]] && exit 0
 # filter some change
-CHANGE_COUNT=$(git diff --name-only "${CURRENT}" "${LATEST}" \
-    | grep -cv '^.github\|^.copr\|^debian\|^snap')
+CHANGE_COUNT=$(git diff --name-only "${CURRENT}" "${LATEST}" |
+    grep -cv '^.github\|^.copr\|^debian\|^snap')
 [[ ${CHANGE_COUNT} -le 0 ]] && exit 0
 popd || exit
 
@@ -87,7 +87,7 @@ if (("$(__check_version_update "${__old_version}" "${__version}")")); then
 fi
 # interface version update
 if [[ "$(osc diff 'Qv2ray-preview.spec' | wc --chars)" != "0" ]]; then
-    up_message="${up_message}"" & bump interface version to ${latest}"
+    up_message="${up_message}"" & bump interface version to ${__interface_latest}"
 fi
 
 osc ar
