@@ -29,6 +29,8 @@ jobs:
           echo -e "${{ secrets.OSCRC_HEADER }}" >  ~/.config/osc/oscrc
           echo -e "${{ secrets.OBS_USER }}"     >> ~/.config/osc/oscrc
           echo -e "${{ secrets.OBS_PASS }}"     >> ~/.config/osc/oscrc
+          echo -e "realname=Github Action"      >> ~/.config/osc/oscrc
+          echo -e "email=action@github.com"     >> ~/.config/osc/oscrc
 
           git config --global user.name 'Github Action'
           git config --global user.email 'action@github.com'
