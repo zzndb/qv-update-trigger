@@ -125,7 +125,7 @@ __renew_obsfile() {
 }
 
 # try 'osc service disablerun' once before re-clone source
-# in: $1 -> name of source dir
+# in: $1 -> name of source dir, because of find, can use without specify name
 __try_renew_obsfile() {
     [[ "$1" == '' ]] && __error_exit "no source dir name set!"
     if ! __renew_obsfile; then

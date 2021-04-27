@@ -62,8 +62,9 @@ git submodule update --init --recursive
 git submodule update --recursive --force
 [[ "${CURRENT}" == "${LATEST}" && "${CURRENT}" != "" ]] && exit 0
 # filter some change
-[[ $(git diff --name-only "${CURRENT}" "${LATEST}" \
-    | grep -cv '^.github\|^.copr\|^debian\|^snap') -le 0 ]] && exit 0
+CHANGE_COUNT=$(git diff --name-only "${CURRENT}" "${LATEST}" \
+    | grep -cv '^.github\|^.copr\|^debian\|^snap')
+[[ ${CHANGE_COUNT} -le 0 ]] && exit 0
 popd || exit
 
 up_message="${up_message} ${CURRENT} -> ${LATEST}"

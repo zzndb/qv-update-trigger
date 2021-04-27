@@ -55,11 +55,11 @@ for p in "${dir_list[@]}"; do
     source "${REPO_DIR}"/scripts/update_interface_version.sh
     update_interface 'service'
     source "${REPO_DIR}"/scripts/update_service_version.sh
-    update_rev
+    update_rev "${p%-preview}"
     if [[ "$(osc diff _service | wc --chars)" != "0" ]]; then
         up_message="${up_message}"" & bump interface version to ${latest}"
         # renew obscpio/obsinfo
-        __try_renew_obsfile
+        __try_renew_obsfile "QvPlugin-*"
     fi
 
     # update

@@ -14,38 +14,41 @@
 # source /home/zzndb/scripts/obs-utils.sh
 
 get_base_version() {
+    pushd "${real_path}/Qv2ray" >/dev/null || exit 2
     __version="$(cat "${VERSION}")"
     value_check "${__version}"
+    popd
 }
 
 get_buildversion() {
+    pushd "${real_path}/Qv2ray" >/dev/null || exit 2
     __buildversion="$(cat "${BUILDVERSION}")"
     value_check "${__buildversion}"
+    popd
 }
 
+# in: $1 prj name with .git
 get_gitrev() {
+    pushd "${real_path}/${1}" >/dev/null || exit 2
     __gitrev="$(git rev-parse --short HEAD)"
     value_check "${__gitrev}"
+    popd
 }
 
 value_check() {
-    [[ "$(wc -l <<< "$1")" != "1" || "$(wc -c <<< "$1")" -le 1 ]] && exit 1
+    [[ "$(wc -l <<<"$1")" != "1" || "$(wc -c <<<"$1")" -le 1 ]] && exit 1
     :
 }
 
 update_version() {
     set -x
-    local real_path
-    real_path="$(readlink -f "$PRJ_DIR")"
-    _service="${real_path}/_service"
-    pushd "${real_path}/Qv2ray" >/dev/null || exit 2
+    prepare
     get_base_version
     get_buildversion
-    get_gitrev
-    popd >/dev/null || exit 2
+    get_gitrev 'Qv2ray'
     local old_version
     old_version="$(__query_service_param 'versionformat')"
-    if ! sed -i "s/${old_version}/${__version}.${__buildversion}~git%cd.${__gitrev}/g" "${_service}" ; then
+    if ! sed -i "s/${old_version}/${__version}.${__buildversion}~git%cd.${__gitrev}/g" "${_service}"; then
         osc revert "${_service}"
         exit 5
     fi
@@ -54,11 +57,19 @@ update_version() {
     set +x
 }
 
+# in: $1 prj name with .git
 update_rev() {
+    prepare
     local old_rev
     old_rev="$(__query_service_param 'revision')"
-    if ! sed -i "s/${old_rev}/${__gitrev}/g" "${_service}" ; then
+    get_gitrev "${1}"
+    if ! sed -i "s/${old_rev}/${__gitrev}/g" "${_service}"; then
         osc revert "${_service}"
         exit 5
     fi
+}
+
+prepare() {
+    real_path="$(readlink -f "$PRJ_DIR")"
+    _service="${real_path}/_service"
 }
