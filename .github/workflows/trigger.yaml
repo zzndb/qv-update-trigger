@@ -21,6 +21,7 @@ jobs:
               obs-service-recompress
               obs-service-set_version
               git
+              cpio # FIXME this line after upstream add cpio to obs_scm requires
 
       - name: Prepare env
         run: |
