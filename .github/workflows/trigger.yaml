@@ -21,6 +21,7 @@ jobs:
               obs-service-recompress
               obs-service-set_version
               git
+              tree
 
       - name: Prepare env
         run: |
@@ -33,7 +34,9 @@ jobs:
           git config --global user.email 'action@github.com'
           git config --global user.password "${{ secrets.GITHUB_TOKEN }}"
 
+          tree
           git clone -b master ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}
+          tree
           echo "REPO_DIR=$(readlink -f ${GITHUB_REPOSITORY#*/})" >> $GITHUB_ENV
 
           mkdir obs && echo "OBS_DIR=$(readlink -f obs)" >> $GITHUB_ENV
@@ -42,4 +45,5 @@ jobs:
         run: |
           export REPO_DIR=${{ env.REPO_DIR }}
           export  OBS_DIR=${{ env.OBS_DIR  }}
+          tree
           ${REPO_DIR}/scripts/qv2ray_previw_update.sh
