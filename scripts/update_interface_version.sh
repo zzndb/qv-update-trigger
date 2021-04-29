@@ -16,7 +16,7 @@ get_interface_version() {
     file="$(find . -type f -name InterfaceVersion)"
     # check whether find the file
     [[ "$(wc -l <<<"$file")" != "1" || "$(wc -c <<<"$file")" -le 1 ]] && exit 1
-    file="$(readlink -f "$file")"
+    file="$(realpath "$file")"
     __interface_latest="$(cat "$file")"
 }
 

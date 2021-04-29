@@ -38,9 +38,9 @@ jobs:
           git config --global user.password "${{ secrets.GITHUB_TOKEN }}"
 
           git clone -b master ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}
-          echo "REPO_DIR=$(readlink -f ${GITHUB_REPOSITORY#*/})" >> $GITHUB_ENV
+          echo "REPO_DIR=$(realpath ${GITHUB_REPOSITORY#*/})" >> $GITHUB_ENV
 
-          mkdir obs && echo "OBS_DIR=$(readlink -f obs)" >> $GITHUB_ENV
+          mkdir obs && echo "OBS_DIR=$(realpath obs)" >> $GITHUB_ENV
 
       - name: Check & Update
         run: |

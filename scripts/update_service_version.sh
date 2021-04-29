@@ -70,6 +70,6 @@ update_rev() {
 }
 
 prepare() {
-    real_path="$(readlink -f "$PRJ_DIR")"
+    real_path="$(realpath "$PRJ_DIR")"
     _service="${real_path}/_service"
 }

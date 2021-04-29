@@ -30,10 +30,10 @@ __query_github_latest() {
 # API_URL needed, like: https://api.github.com/repos/user_name/repo_name/tags
 # o: latest tag, without prefix 'v'
 __query_github_latest_tag() {
-    [[ -v "${API_URL}" ]] && __error_exit "REPO API_URL needed!" 2
+    [[ ! -v API_URL ]] && __error_exit "${FUNCNAME[0]}: REPO API_URL needed!" 2
     local latest
     latest="$(wget "${API_URL}" -qO - | jq '.[0].name' | tr -d '"')"
-    [[ "$?" != 0 ]] && exit 1
+    [[ "$?" != 0 ]] && __error_exit "${FUNCNAME[0]}: error with latest tag query" 1
     echo "${latest#v}"
 }
 
@@ -42,8 +42,8 @@ __query_github_latest_tag() {
 # PRJ_DIR needed
 __query_service_param() {
     local real_path
-    [[ -v "${PRJ_DIR}" ]] && __error_exit "Project directory 'PRJ_DIR' needed!" 2
-    real_path="$(readlink -f "$PRJ_DIR")"
+    [[ ! -v PRJ_DIR ]] && __error_exit "${FUNCNAME[0]}: Project directory 'PRJ_DIR' needed!" 2
+    real_path="$(realpath "$PRJ_DIR")"
     pushd "${real_path}" >/dev/null || exit 2
     _service="${real_path}/_service"
     [[ ! -f "${_service}" ]] && exit 3
@@ -60,9 +60,9 @@ __query_service_param() {
 # PRJ_DIR needed
 __set_service_param() {
     local real_path
-    [[ "${1}" == "" ]] && __error_exit "param  needed!" 3
-    [[ -v "${PRJ_DIR}" ]] && __error_exit "Project directory 'PRJ_DIR' needed!" 2
-    real_path="$(readlink -f "$PRJ_DIR")"
+    [[ "${1:-}" == "" || "${2:-}" == "" ]] && __error_exit "${FUNCNAME[0]}: param k/v needed!" 3
+    [[ ! -v PRJ_DIR ]] && __error_exit "${FUNCNAME[0]}: Project directory 'PRJ_DIR' needed!" 2
+    real_path="$(realpath "$PRJ_DIR")"
     pushd "${real_path}" >/dev/null || exit 2
     _service="${real_path}/_service"
     [[ ! -f "${_service}" ]] && exit 3
@@ -81,9 +81,9 @@ __set_service_param() {
 # like: <param name="version">2.7.0.6000~git.94d701ce</param>
 # o: 2.7.0
 __query_old_base_version() {
-    [[ -v "${PRJ_DIR}" ]] && __error_exit "Project directory 'PRJ_DIR' needed!" 2
+    [[ ! -v PRJ_DIR ]] && __error_exit "${FUNCNAME[0]}: Project directory 'PRJ_DIR' needed!" 2
     local real_path
-    real_path="$(readlink -f "$PRJ_DIR")"
+    real_path="$(realpath "$PRJ_DIR")"
     pushd "${real_path}" >/dev/null || exit 2
     _service="${real_path}/_service"
     [[ ! -f "${_service}" ]] && exit 3
@@ -127,7 +127,7 @@ __renew_obsfile() {
 # try 'osc service disablerun' once before re-clone source
 # in: $1 -> name of source dir, because of find, can use without specify name
 __try_renew_obsfile() {
-    [[ "$1" == '' ]] && __error_exit "no source dir name set!"
+    [[ "${1:-}" == '' ]] && __error_exit "${FUNCNAME[0]}: no source dir name set!"
     if ! __renew_obsfile; then
         # remove old source dir to escape otential pull merge error
         find . -maxdepth 1 -type d -name "$1" -exec rm -rf {} \;
@@ -138,15 +138,15 @@ __try_renew_obsfile() {
 
 # switch to called script / specify ($1) directory
 __switch_to_prj_dir() {
-    if [[ "$1" != '' && -d "$1" ]]; then
-        pushd "$1" || __error_exit "for some reason can not pushd in ${1}"
+    if [[ "${1:-}" != '' && -d "$1" ]]; then
+        pushd "$1" || __error_exit "${FUNCNAME[0]}: for some reason can not pushd in ${1}"
     else
         local FILE_PATH
         local PRJ_PATH
-        FILE_PATH="$(readlink -f "$0")"
+        FILE_PATH="$(realpath "$0")"
         PRJ_PATH="$(dirname "$FILE_PATH")"
         [[ -d "$PRJ_PATH" ]] && pushd "$PRJ_PATH" ||
-            __error_exit "for some reason can not pushd in ${PRJ_PATH}"
+            __error_exit "${FUNCNAME[0]}: for some reason can not pushd in ${PRJ_PATH}"
     fi
 
 }
