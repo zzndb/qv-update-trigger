@@ -54,7 +54,7 @@ update_service_version() {
 }
 
 update_interface() {
-    set -x
+    [[ ! -o xtrace ]] && set -x && without_xtrace=
     target="${1:-service}"
     get_interface_version
     # check target parameter 'spec'
@@ -67,7 +67,7 @@ update_interface() {
     [[ "${__interface_old}" -eq "${__interface_latest}" ]] && return
     [[ "${__interface_old}" -gt "${__interface_latest}" ]] && exit 3
     update_service_version "${target}"
-    set +x
+    [[ -v without_xtrace ]] && set +x && unset without_xtrace || :
 }
 
 # just '$@' for function test

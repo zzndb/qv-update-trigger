@@ -18,6 +18,7 @@ up_message='trigger update'
 VERSION='makespec/VERSION'
 BUILDVERSION='makespec/BUILDVERSION'
 
+set -x
 ## 0xFF
 ## checkout obs prj source
 pushd "${OBS_DIR}" || exit
@@ -29,16 +30,6 @@ pushd "${PRJ_DIR}" || exit
 if ! osc up; then
     exit
 fi
-
-## 0x01
-### update version if needed
-### get from github release & sed replace all version
-# ~/scripts/update_parent_version.sh
-# [[ "$?" != 0 ]] && exit
-#
-## 0x01-1
-## get all version from source
-set -x
 
 source "${REPO_DIR}"/scripts/obs-utils.sh
 __old_version="$(__query_old_base_version "versionformat")"
@@ -75,7 +66,6 @@ update_version
 source "${REPO_DIR}"/scripts/update_interface_version.sh
 update_interface 'spec'
 
-set -x
 ## 0x02
 __try_renew_obsfile "Qv2ray"
 

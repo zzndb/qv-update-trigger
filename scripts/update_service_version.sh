@@ -36,12 +36,11 @@ get_gitrev() {
 }
 
 value_check() {
-    [[ "$(wc -l <<<"$1")" != "1" || "$(wc -c <<<"$1")" -le 1 ]] && exit 1
-    :
+    [[ "$(wc -l <<<"$1")" != "1" || "$(wc -c <<<"$1")" -le 1 ]] && exit 1 || :
 }
 
 update_version() {
-    set -x
+    [[ ! -o xtrace ]] && set -x && without_xtrace=
     prepare
     get_base_version
     get_buildversion
@@ -54,7 +53,7 @@ update_version() {
     fi
     # change revision as well
     update_rev 'Qv2ray'
-    set +x
+    [[ -v without_xtrace ]] && set +x && unset without_xtrace || :
 }
 
 # in: $1 prj name with .git
