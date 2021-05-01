@@ -4,7 +4,7 @@ set -euo pipefail
 
 ## needed outer parameters
 ## OBS_DIR, REPO_DIR
-OBS_PRJ='home:zzndb001:test'
+OBS_PRJ='home:zzndb:Qv2ray'
 UP_USER='Qv2ray'
 
 # needed: plugins project placed in the directory below
