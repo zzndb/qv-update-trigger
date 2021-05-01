@@ -7,12 +7,19 @@ __error_exit() {
 }
 
 __empty_test() {
-    [[ "${1}" == "" ]] && exit "${2:-99}"
-    :
+    [[ "${1}" == "" ]] && exit "${2:-99}" || :
+}
+
+# i: $1=$?, $2=error message
+__exit_status_check() {
+    if (($1 != 0)); then
+        __error_exit "$2" "$1"
+    fi
 }
 
 # get 'latest' version
 # API_URL needed, like: https://api.github.com/repos/user_name/user_name/releases/latest
+# i: optional $1, if set do not delete prefix 'v'
 # o: latest tag, without prefix 'v'
 __query_github_latest() {
     [[ -v "${API_URL}" ]] && __error_exit "REPO API_URL needed!" 2
@@ -21,8 +28,8 @@ __query_github_latest() {
     else
         local latest
         latest="$(wget "${API_URL}" -qO - | jq '.tag_name' | tr -d '"')"
-        [[ "$?" != 0 ]] && exit 1
-        echo "${latest#v}"
+        __exit_status_check "$?" "${FUNCNAME[0]}: error with latest (version) query"
+        [[ -v 1 ]] && echo "${latest}" || echo "${latest#v}"
     fi
 }
 
@@ -33,7 +40,7 @@ __query_github_latest_tag() {
     [[ ! -v API_URL ]] && __error_exit "${FUNCNAME[0]}: REPO API_URL needed!" 2
     local latest
     latest="$(wget "${API_URL}" -qO - | jq '.[0].name' | tr -d '"')"
-    [[ "$?" != 0 ]] && __error_exit "${FUNCNAME[0]}: error with latest tag query" 1
+    __exit_status_check "$?" "${FUNCNAME[0]}: error with latest tag query"
     echo "${latest#v}"
 }
 
@@ -141,8 +148,7 @@ __switch_to_prj_dir() {
     if [[ "${1:-}" != '' && -d "$1" ]]; then
         pushd "$1" || __error_exit "${FUNCNAME[0]}: for some reason can not pushd in ${1}"
     else
-        local FILE_PATH
-        local PRJ_PATH
+        local FILE_PATH PRJ_PATH
         FILE_PATH="$(realpath "$0")"
         PRJ_PATH="$(dirname "$FILE_PATH")"
         [[ -d "$PRJ_PATH" ]] && pushd "$PRJ_PATH" ||
@@ -151,4 +157,69 @@ __switch_to_prj_dir() {
 
 }
 
-# TODO query version from spec
+# query param from spec, only the first one will be got if the param used more than once
+in: $1 param name like: Name, Version
+__query_spec_param() {
+    local real_path spec_file value
+    [[ "${1:-}" == "" ]] && __error_exit "${FUNCNAME[0]}: param k needed!" 3
+    [[ ! -v PRJ_DIR ]] && PRJ_DIR="$(realpath .)"
+    real_path="$(realpath "$PRJ_DIR")"
+    pushd "${real_path}" >/dev/null || exit 2
+    spec_file="$(find . -maxdepth 1 -type f -name "*.spec")"
+    [[ ${spec_file} == "" ]] && __error_exit "${FUNCNAME[0]}: no .spec file found!" 1
+    [[ $(wc -l <<<"${spec_file}") -gt 1 ]] &&
+        __error_exit "${FUNCNAME[0]}: more than one .spec file found!" 1
+    [[ ! -f "${spec_file}" ]] && exit 3
+    spec_file="$(realpath "${spec_file}")"
+
+    value="$(awk -F':' "BEGIN{c=0} /${1}:/ {if (c==0) {print \$2}; c=1}" "${spec_file}")"
+    # only work for space more than one between k/v
+    value="${value##*  }"
+    [[ ${value} == "" ]] && __error_exit "${FUNCNAME[0]}: empty value got!" 4 || echo "${value}"
+    popd >/dev/null || exit 2
+}
+
+# set spec param value, only the first one will be set if the param used more than once
+# in: $1 param name like: Name, Version
+#     $2 param value
+__set_spec_param() {
+    local real_path spec_file value
+    [[ "${1:-}" == "" || "${2:-}" == "" ]] && __error_exit "${FUNCNAME[0]}: param k/v needed!" 3
+    [[ ! -v PRJ_DIR ]] && PRJ_DIR="$(realpath .)"
+    real_path="$(realpath "$PRJ_DIR")"
+    pushd "${real_path}" >/dev/null || exit 2
+    spec_file="$(find . -maxdepth 1 -type f -name "*.spec")"
+    [[ ${spec_file} == "" ]] && __error_exit "${FUNCNAME[0]}: no .spec file found!" 1
+    [[ $(wc -l <<<"${spec_file}") -gt 1 ]] &&
+        __error_exit "${FUNCNAME[0]}: more than one .spec file found!" 1
+    [[ ! -f "${spec_file}" ]] && exit 3
+    spec_file="$(realpath "${spec_file}")"
+
+    space="$(awk -F':' "BEGIN{c=0} /${1}:/ {if (c==0) {print \$2}; c=1}" "${spec_file}")"
+    # only work for space more than one between k/v
+    space="${space%${space##*  }}"
+    if ! sed -i "s/^${1}:${space}.*$/${1}:${space}${2}/" "${spec_file}"; then
+        osc revert "${spec_file}"
+        __error_exit "${FUNCNAME[0]}: sed replace ${1} with error" 5
+    fi
+    popd >/dev/null || exit 2
+}
+
+# replace .changes user info
+# in: $1 optional dir contain .changes file
+__hide_changes_userinfo() {
+    local obs_user obs_mail
+    obs_user='opensuse-packaging'
+    obs_mail='opensuse-packaging@opensuse.org'
+
+    __switch_to_prj_dir "$1"
+    local file_path
+    file_path=$(find . -maxdepth 1 -type f -name "*.changes")
+    [[ ${file_path} == "" ]] && __error_exit "${FUNCNAME[0]}: no .changes file found!" 1
+    [[ $(wc -l <<<"${file_path}") -gt 1 ]] &&
+        __error_exit "${FUNCNAME[0]}: more than one .changes file found!" 1
+    file_path=$(realpath "$file_path")
+
+    # Wed Jun 24 06:17:14 UTC 2020 - opensuse-packaging <opensuse-packaging@opensuse.org>
+    sed -i "s/ - .* <.*@.*>$/ - ${obs_user} <${obs_mail}>/" "${file_path}"
+}
