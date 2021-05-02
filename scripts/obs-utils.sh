@@ -158,7 +158,7 @@ __switch_to_prj_dir() {
 }
 
 # query param from spec, only the first one will be got if the param used more than once
-in: $1 param name like: Name, Version
+# in: $1 param name like: Name, Version
 __query_spec_param() {
     local real_path spec_file value
     [[ "${1:-}" == "" ]] && __error_exit "${FUNCNAME[0]}: param k needed!" 3
