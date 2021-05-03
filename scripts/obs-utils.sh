@@ -212,7 +212,7 @@ __hide_changes_userinfo() {
     obs_user='opensuse-packaging'
     obs_mail='opensuse-packaging@opensuse.org'
 
-    __switch_to_prj_dir "$1"
+    __switch_to_prj_dir "${1:-}"
     local file_path
     file_path=$(find . -maxdepth 1 -type f -name "*.changes")
     [[ ${file_path} == "" ]] && __error_exit "${FUNCNAME[0]}: no .changes file found!" 1
