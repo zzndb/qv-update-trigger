@@ -8,7 +8,7 @@ set -euo pipefail
 
 ## needed outer parameters
 ## OBS_DIR, REPO_DIR
-OBS_PRJ='home:zzndb/Qv2ray-preview'
+OBS_PRJ='home:zzndb:Qv2ray/Qv2ray-preview'
 UP_REPO='Qv2ray/Qv2ray'
 PRJ_DIR="${OBS_DIR}/${OBS_PRJ}"
 API_URL="https://api.github.com/repos/${UP_REPO}/releases/latest"
