@@ -2,12 +2,17 @@
 # set -euo pipefail
 
 __error_exit() {
-    echo -e "$1"
+    echo -e "$1" > /dev/stderr
     exit "${2:-99}"
 }
 
 __empty_test() {
     [[ "${1}" == "" ]] && exit "${2:-99}" || :
+}
+
+# test $1 call __error_exit with $2 $3
+__empty_exit() {
+    [[ "${1}" == "" ]] && __error_exit "${2:-}" "${3:-99}" || :
 }
 
 # i: $1=$?, $2=error message
@@ -143,18 +148,23 @@ __try_renew_obsfile() {
     fi
 }
 
-# switch to called script / specify ($1) directory
+# switch to called script / specify ($1) directory, set PRJ_DIR if needed
 __switch_to_prj_dir() {
+    local prj_dir
     if [[ "${1:-}" != '' && -d "$1" ]]; then
         pushd "$1" || __error_exit "${FUNCNAME[0]}: for some reason can not pushd in ${1}"
+        prj_dir="$1"
     else
         local FILE_PATH PRJ_PATH
         FILE_PATH="$(realpath "$0")"
         PRJ_PATH="$(dirname "$FILE_PATH")"
         [[ -d "$PRJ_PATH" ]] && pushd "$PRJ_PATH" ||
-            __error_exit "${FUNCNAME[0]}: for some reason can not pushd in ${PRJ_PATH}"
+                __error_exit "${FUNCNAME[0]}: for some reason can not pushd in ${PRJ_PATH}"
+        prj_dir="$PRJ_PATH"
     fi
-
+    if [[ ! -v PRJ_DIR ]]; then
+        export PRJ_DIR="${prj_dir}"
+    fi
 }
 
 # query param from spec, only the first one will be got if the param used more than once
@@ -222,4 +232,28 @@ __hide_changes_userinfo() {
 
     # Wed Jun 24 06:17:14 UTC 2020 - opensuse-packaging <opensuse-packaging@opensuse.org>
     sed -i "s/ - .* <.*@.*>$/ - ${obs_user} <${obs_mail}>/" "${file_path}"
+    # Wed Jun 24 06:17:14 UTC 2020 - opensuse-packaging@opensuse.org
+    # TODO correct it
+    # sed -i "s/ - .*@[0-9A-Za-z.]*$/ - ${obs_mail}/" "${file_path}"
+}
+
+# renew golang vendor
+# $1: name of source dir
+__renew_golang_vendor() {
+    [[ "${1:-}" == '' ]] && __error_exit "${FUNCNAME[0]}: no source dir name set!"
+    pushd "$1" || __error_exit "${FUNCNAME[0]}: source dir name ${1} not right?"
+    # TODO check vendor ext
+    go mod vendor && tar cJf ../vendor.tar.xz vendor && rm -r vendor
+    popd || __error_exit "${FUNCNAME[0]}: can not popd with ${PWD} -> $(dirs | cut -d' ' -f2) ???"
+}
+
+# renew cargo vendor
+# $1: name of source dir
+__renew_cargo_vendor() {
+    [[ "${1:-}" == '' ]] && __error_exit "${FUNCNAME[0]}: no source dir name set!"
+    pushd "$1" || __error_exit "${FUNCNAME[0]}: source dir name ${1} not right?"
+    # TODO check vendor ext
+    cargo vendor && tar cJf ../vendor.tar.xz vendor && rm -r vendor
+    # TODO check cargo-home set instruct
+    popd || __error_exit "${FUNCNAME[0]}: can not popd with ${PWD} -> $(dirs | cut -d' ' -f2) ???"
 }
