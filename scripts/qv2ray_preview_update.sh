@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 #
+# Requires:
+#   git (git-core)
+#   osc
+#
 set -euo pipefail
 
 # - update base

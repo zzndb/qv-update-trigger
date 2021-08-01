@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 #
+# Requires:
+#   osc
+#   find (findutils)
+#   git (git-core)
+#
 set -euo pipefail
 
 ## needed outer parameters

@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # set -euo pipefail
+#
+# Requires:
+#   find (findutils)
+#   wc, realpath, cat (coreutils)
+#   grep
 
 # do what?
 #   check github page / updated local for interface version

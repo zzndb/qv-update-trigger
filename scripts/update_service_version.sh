@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # set -euo pipefail
+#
+# Requires:
+#   cat, realpath, wc (coreutils)
+#   git (git-core)
 
 # process Qv2ray_preview _service file 'parent-tag' and 'versionprefix' part
 # with the latest version which get query from github

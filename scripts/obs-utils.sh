@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 # set -euo pipefail
+#
+# Requires:
+#   wget
+#   realpath, tr, dirname, wc (coreutils)
+#   grep
+#   find (findutils)
+#   awk (gawk)
 
 __error_exit() {
     echo -e "$1" > /dev/stderr

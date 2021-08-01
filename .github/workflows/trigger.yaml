@@ -22,6 +22,10 @@ jobs:
               obs-service-set_version
               git
               gawk
+              find
+              wget
+              grep
+              bash
               cpio # FIXME this line after upstream add cpio to obs_scm requires
 
       - name: Prepare env
